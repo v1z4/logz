@@ -13,24 +13,24 @@ module Logz
       @loggers[:default] = Logger.new(STDOUT)
     end
 
-    def add(name, path = '')
+    def add(name, path = '', prefix: '')
       if name.is_a?(Array)
         name.each { |n| add(n) }
       else
-        log_path = set_log_path(path, name)
+        log_path = set_log_path(path, name, prefix: prefix)
         @loggers[name.to_sym] = Logger.new(log_path)
       end
     end
 
-    def <<(name, path = '')
-      add(name, path)
+    def <<(name, path = '', prefix = '')
+      add(name, path, prefix: prefix)
     end
 
-    def add_dual(name, path = '')
+    def add_dual(name, path = '', prefix: '')
       if name.is_a?(Array)
         name.each { |n| add_dual(n) }
       else
-        log_path = set_log_path(path, name)
+        log_path = set_log_path(path, name, prefix: prefix)
         multi_io = MultiIO.new(STDOUT, File.open(log_path, "a+"))
         @loggers[name.to_sym] = Logger.new(multi_io)
       end
@@ -58,9 +58,9 @@ module Logz
 
     private
 
-    def set_log_path(path, name)
+    def set_log_path(path, name, prefix: '')
       log_path = path.starts_with?('/') ? path : folder + '/' + path
-      log_path << "/#{name}.log"
+      log_path << "/#{name}#{prefix}.log"
     end
 
   end
