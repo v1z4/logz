@@ -46,6 +46,10 @@ module Logz
       loggers[name.to_sym]
     end
 
+    def global_level=(level)
+      loggers.each { |name, logger| logger.level = level }
+    end
+
     def method_missing(m, *args, &block)
       if loggers[:default].respond_to?(m)
         loggers[:default].send(m, *args)
