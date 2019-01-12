@@ -13,27 +13,23 @@ module Logz
       @loggers[:default] = Logger.new(STDOUT)
     end
 
-    def add(name, path = '', prefix: '')
+    def add(name, path = '', prefix: '', to_stdout: false, to_file: true)
       if name.is_a?(Array)
         name.each { |n| add(n) }
       else
-        log_path = set_log_path(path, name, prefix: prefix)
-        @loggers[name.to_sym] = Logger.new(log_path)
+        output = if to_stdout && to_file
+                  MultiIO.new(STDOUT, File.open(log_path, "a+"))
+                elsif to_stdout
+                  STDOUT
+                elsif to_file
+                  set_log_path(path, name, prefix: prefix)
+                end
+        @loggers[name.to_sym] = Logger.new(output)
       end
     end
 
     def <<(name, path = '', prefix = '')
       add(name, path, prefix: prefix)
-    end
-
-    def add_dual(name, path = '', prefix: '')
-      if name.is_a?(Array)
-        name.each { |n| add_dual(n) }
-      else
-        log_path = set_log_path(path, name, prefix: prefix)
-        multi_io = MultiIO.new(STDOUT, File.open(log_path, "a+"))
-        @loggers[name.to_sym] = Logger.new(multi_io)
-      end
     end
 
     def each
