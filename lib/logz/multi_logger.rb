@@ -15,7 +15,7 @@ module Logz
 
     def add(name, path = '', prefix: '', to_stdout: false, to_file: true)
       if name.is_a?(Array)
-        name.each { |n| add(n) }
+        name.each { |n| add(n, path, prefix: prefix, to_stdout: to_stdout, to_file: to_file) }
       else
         output = if to_stdout && to_file
                   MultiIO.new(STDOUT, File.open(log_path, "a+"))
