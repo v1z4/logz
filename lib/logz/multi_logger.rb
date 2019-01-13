@@ -18,11 +18,12 @@ module Logz
         name.each { |n| add(n, path, prefix: prefix, to_stdout: to_stdout, to_file: to_file) }
       else
         output = if to_stdout && to_file
+                  log_path = set_log_path(path, name, prefix: prefix)
                   MultiIO.new(STDOUT, File.open(log_path, "a+"))
                 elsif to_stdout
                   STDOUT
                 elsif to_file
-                  set_log_path(path, name, prefix: prefix)
+                  log_path = set_log_path(path, name, prefix: prefix)
                 end
         @loggers[name.to_sym] = Logger.new(output)
       end
