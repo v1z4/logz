@@ -71,7 +71,7 @@ logger.add 'alerts', '/var/log/alerts/'
 Dual logger allows you to write in log file and STDOUT in the same time.
 
 ```
-logger.add_dual 'alerts'
+logger.add 'alerts', to_stdout: true
 logger.info 'foobar' # outputs to STDOUT and alerts.log
 ```
 
