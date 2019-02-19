@@ -5,7 +5,7 @@ module Logz
 
     def initialize(folder = nil)
       if folder
-        @folder = folder.starts_with?('/') ? folder : (Dir.pwd + '/' + folder)
+        @folder = folder.start_with?('/') ? folder : (Dir.pwd + '/' + folder)
       else
         @folder = Dir.pwd
       end
@@ -60,7 +60,7 @@ module Logz
     private
 
     def set_log_path(path, name, prefix: '')
-      log_path = path.starts_with?('/') ? path : folder + '/' + path
+      log_path = path.start_with?('/') ? path : folder + '/' + path
       log_path << "/#{name}#{prefix}.log"
     end
 
