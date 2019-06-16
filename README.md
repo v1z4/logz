@@ -1,6 +1,12 @@
 # Logz
 
-# Single log class to rule them all.
+## Key features:
+- Manage all your log files
+- Easy and lightweight, no other gems required
+- Write in two streams: STDOUT and log file when you need it
+- Set level of all logs just in single method
+- Add and remove 
+
 
 ## Installation
 
@@ -23,61 +29,97 @@ Or install using rubygems:
 ```
 require 'logz'
 
-logger = Logz.new
+logz = Logz.new
 
 You can use this logger just as regular Logger class in Ruby:
 
-logger.debug 'Foo'
-logger.info 'Bar'
-logger.warn 'Warning'
-logger.error 'Error'
+# outputs to STDOUT
+logz.debug 'Foo'
+logz.info 'Bar'
+logz.warn 'Warning'
+logz.error 'Error'
 ```
 
-## Adding another logger
+## Add logger
 
 ```
-logger.add 'alerts'
-# or:
-logger << 'alerts'
+logz.add 'server'
+# same as:
+logz.add 'server', 'log/server', to_stdout: true, to_file: true
 ```
 
-This new logger will be created in the default folder, with same name (alerts.log)
+This new logger will be created in the default folder, with the same name (server.log). By default, it writes both to STDOUT and log file.
 
 
-### Adding multiple loggers
+## Select STDOUT or file logger
 
 ```
-logger.add ['alerts', 'messages']
-logger.alerts.warn "Foo"
-logger.messages.info "Bar"
+logz.add 'client', to_stdout: true, to_file: false
+logz.client.info 'test client' # writes to STDOUT only
+```
+
+```
+logz.add 'server', to_stdout: false, to_file: true
+logz.server.info 'test server' # writes to log file only
+```
+
+
+### Add multiple loggers
+
+```
+logz.add ['server', 'client']
+logz.server.warn "Foo"
+logz.client.info "Bar"
 # or
-logger[:messages].info "Foobar"
+logz[:server].warn "Foo"
+logz[:client].info "Bar"
 ```
 
-### Setting up file's path
-
-Setting global log file directory:
-```
-logger = Logz.new('/tmp/log')
-```
-
-Selected file path:
-```
-logger.add 'alerts', '/var/log/alerts/'
-```
-
-### Adding dual logger
-
-Dual logger allows you to write in log file and STDOUT in the same time.
+### Iterate as using array
 
 ```
-logger.add 'alerts', to_stdout: true
-logger.info 'foobar' # outputs to STDOUT and alerts.log
+logz.each do |logger|
+  logger.level = Logger::WARN
+end
+```
+
+Or do the same:
+```
+logz.global_level = Logger::WARN
+```
+
+### Configuration
+
+Config file is optional. Default params:
+
+```
+Logz.configuration do |config|
+  # Set loggers in config
+  config.loggers = [] # example: %w(server client important)
+
+  # Write to STDOUT by default (may be disabled on production)
+  config.output_to_stdout = true
+
+  # Write to log file by default (may be disabled on development)
+  config.output_to_file = true
+
+  # Log file default extension
+  config.extension = 'log'
+
+  # Default folder is ./log. You may also specify absolute path: '/var/log'
+  config.folder = 'log'
+
+  # Suffix for log filename
+  config.suffix = ''
+
+  # Prefix for log filename
+  config.prefix = ''
+end
 ```
 
 ### Extra tips:
 
-Setting up custom formatter for all logs:
+Set up custom formatter for all logs:
 ```
 logger.each do |l|
   l.formatter = proc do |severity, datetime, progname, msg|
@@ -85,7 +127,6 @@ logger.each do |l|
   end
 end
 ```
-
 
 ## Contributing
 
