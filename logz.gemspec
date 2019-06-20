@@ -7,9 +7,9 @@ Gem::Specification.new do |spec|
   spec.version       = Logz::VERSION
   spec.authors       = ["Ivan Tumanov"]
   spec.email         = ["vizakenjack@gmail.com"]
-
+  spec.licenses      = ['MIT']
   spec.summary       = %q{Simple and lightweight logger tool}
-  spec.description   = %q{Simple and lightweight logger tool}
+  spec.description   = %q{Output to STDOUT and log file at the same time. Support for multiple log files.}
   spec.homepage      = "https://github.com/vizakenjack/logz"
 
   # Specify which files should be added to the gem when it is released.

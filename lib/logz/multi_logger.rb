@@ -5,15 +5,25 @@ module Logz
 
     def initialize(folder = nil)
       @folder = set_folder(folder)
-      @loggers = { stdout: Logger.new(STDOUT) }
+      @loggers = {}
 
       FileUtils.mkdir_p(@folder)  unless File.directory?(@folder)
+
+      add(Logz.configuration.default)
       Logz.configuration.loggers.each { |logger_name| add(logger_name) }  if Logz.configuration.loggers.any?
     end
 
     def add(name, path = '', to_stdout: nil, to_file: nil)
       to_stdout = Logz.configuration.output_to_stdout  if to_stdout == nil
       to_file   = Logz.configuration.output_to_file    if to_file == nil
+
+      if !name || name.empty?
+        return false
+      elsif name == STDOUT || name == 'stdout'
+        name = 'stdout'
+        to_stdout = true
+        to_file = false
+      end
 
       if name.is_a?(Array)
         name.each { |n| add(n, path, to_stdout: to_stdout, to_file: to_file) }
@@ -49,6 +59,10 @@ module Logz
       loggers.each { |name, logger| logger.level = level }
     end
 
+    def default_logger
+      loggers[Logz.configuration.default&.to_sym]
+    end
+
     def method_missing(m, *args, &block)
       if loggers.has_key?(m)
         if args.empty?
@@ -56,8 +70,8 @@ module Logz
         else
           puts "Invalid method for logger '#{m}': #{args.join(', ')}"
         end
-      elsif loggers[:stdout].respond_to?(m)
-        loggers[:stdout].send(m, *args)
+      elsif default_logger.respond_to?(m)
+        default_logger.send(m, *args)
       else
         puts "Logger '#{m}' not found. Current loggers: #{loggers.keys.join(', ')}"
       end

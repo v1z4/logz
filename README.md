@@ -33,7 +33,7 @@ logz = Logz.new
 
 You can use this logger just as regular Logger class in Ruby:
 
-# outputs to STDOUT
+# default logger outputs to STDOUT
 logz.debug 'Foo'
 logz.info 'Bar'
 logz.warn 'Warning'
@@ -46,10 +46,11 @@ logz.error 'Error'
 logz.add 'server'
 # same as:
 logz.add 'server', 'log/server', to_stdout: true, to_file: true
+# Usage:
+logz.server.info 'test'
 ```
 
 This new logger will be created in the default folder, with the same name (server.log). By default, it writes both to STDOUT and log file.
-
 
 ## Select STDOUT or file logger
 
@@ -94,7 +95,10 @@ Config file is optional. Default params:
 
 ```
 Logz.configuration do |config|
-  # Set loggers in config
+  # Set to nil to turn off default logger
+  config.default = 'stdout'
+
+  # Set loggers
   config.loggers = [] # example: %w(server client important)
 
   # Write to STDOUT by default (may be disabled on production)
@@ -121,7 +125,7 @@ end
 
 Set up custom formatter for all logs:
 ```
-logger.each do |l|
+logz.each do |l|
   l.formatter = proc do |severity, datetime, progname, msg|
     "[#{datetime}] [#{severity}] #{msg}\n"
   end

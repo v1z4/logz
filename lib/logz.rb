@@ -6,13 +6,14 @@ require 'logz/multi_logger'
 module Logz
   class Configuration
     attr_accessor :folder, :output_to_stdout, :output_to_file,
-                  :suffix, :prefix, :loggers, :extension
+                  :default, :suffix, :prefix, :loggers, :extension
 
     def initialize
       @output_to_stdout = true
       @output_to_file = true
-      @extension = 'log'
+      @default = 'stdout'
       @folder = 'log'
+      @extension = 'log'
       @loggers = []
       @suffix = ''
       @prefix = ''
