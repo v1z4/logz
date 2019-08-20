@@ -2,26 +2,26 @@ require 'logger'
 require 'logz/version'
 require 'logz/multi_io'
 require 'logz/multi_logger'
+require 'logz/tagged_logger'
 
 module Logz
-  class Configuration
+  class Config
     attr_accessor :folder, :output_to_stdout, :output_to_file,
-                  :default, :suffix, :prefix, :loggers, :extension
+                  :suffix, :prefix, :loggers, :extension
 
     def initialize
       @output_to_stdout = true
       @output_to_file = true
-      @default = 'stdout'
       @folder = 'log'
       @extension = 'log'
-      @loggers = []
+      @loggers = [:stdout]
       @suffix = ''
       @prefix = ''
     end
   end
 
   class << self
-    attr_accessor :configuration
+    attr_accessor :config
   end
 
   def self.new(*params)
@@ -30,7 +30,7 @@ module Logz
   end
   
   def self.configure
-    self.configuration ||= Configuration.new
-    yield(configuration)  if block_given?
+    self.config ||= Config.new
+    yield(config)  if block_given?
   end
 end
