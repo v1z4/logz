@@ -3,7 +3,7 @@ module Logz
     include Enumerable
     attr_accessor :folder, :loggers
 
-    def initialize(folder = nil, loggers: [])
+    def initialize(folder = Logz.config.folder, loggers: [])
       @folder = set_folder(folder)
       @loggers = {}
       Logz.config.loggers.dup.push(*loggers).each { |name| add(name) }
@@ -64,7 +64,7 @@ module Logz
 
     private
 
-    def set_folder(folder = Logz.config.folder)
+    def set_folder(folder)
       dir = if !folder || folder.empty? || folder == '.' || folder == './'
               Dir.pwd
             elsif folder.start_with?('/')
