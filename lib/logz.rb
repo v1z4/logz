@@ -1,8 +1,9 @@
-require 'logger'
-require 'logz/version'
-require 'logz/multi_io'
-require 'logz/multi_logger'
-require 'logz/tagged_logger'
+require "logger"
+require "fileutils"
+require "logz/version"
+require "logz/multi_io"
+require "logz/multi_logger"
+require "logz/tagged_logger"
 
 module Logz
   class Config
@@ -12,11 +13,11 @@ module Logz
     def initialize
       @output_to_stdout = true
       @output_to_file = true
-      @folder = 'log'
-      @extension = 'log'
+      @folder = "log"
+      @extension = "log"
       @loggers = [:stdout]
-      @suffix = ''
-      @prefix = ''
+      @suffix = ""
+      @prefix = ""
     end
   end
 
@@ -28,9 +29,9 @@ module Logz
     configure
     MultiLogger.new(*params)
   end
-  
+
   def self.configure
     self.config ||= Config.new
-    yield(config)  if block_given?
+    yield(config) if block_given?
   end
 end
