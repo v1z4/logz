@@ -4,8 +4,8 @@ module Logz
     attr_accessor :folder, :loggers
 
     def initialize(folder = Logz.config.folder, loggers: [])
-      @folder = set_folder(folder)
       @loggers = {}
+      @folder = set_and_create_folder(folder)
       Logz.config.loggers.dup.push(*loggers).each { |name| add(name) }
     end
 
@@ -13,10 +13,10 @@ module Logz
       if name.is_a?(Array)
         name.each { |log| add(log, path, to_stdout: to_stdout, to_file: to_file) }
       elsif name == STDOUT || name.to_s == "stdout"
-        @loggers[:stdout] = TaggedLogger.new(STDOUT)
+        @loggers[:stdout] = LoggerWrapper.new(STDOUT)
       else
         output_stream = set_output_stream(name, path, to_stdout, to_file)
-        @loggers[name.to_sym] = TaggedLogger.new(output_stream)
+        @loggers[name.to_sym] = LoggerWrapper.new(output_stream)
       end
     end
 
@@ -56,6 +56,8 @@ module Logz
         else
           puts "Invalid method for logger '#{m}': #{args.join(", ")}"
         end
+      elsif default_logger.has_level?(m)
+        default_logger.logger.send(m, *args, &block)
       elsif default_logger.respond_to?(m)
         default_logger.send(m, *args, &block)
       else
@@ -65,16 +67,20 @@ module Logz
 
     private
 
-    def set_folder(folder)
-      dir = if !folder || folder.empty? || folder == "." || folder == "./"
-              Dir.pwd
-            elsif folder.start_with?("/")
-              folder
-            else
-              File.join(Dir.pwd, folder)
-            end
+    def set_and_create_folder(folder)
+      set_folder(folder).tap do |f|
+        FileUtils.mkdir_p(f) unless File.directory?(f)
+      end
+    end
 
-      dir.tap { |d| FileUtils.mkdir_p(d) unless File.directory?(d) }
+    def set_folder(folder)
+      if !folder || folder.empty? || folder == "." || folder == "./"
+        Dir.pwd
+      elsif folder.start_with?("/")
+        folder
+      else
+        File.join(Dir.pwd, folder)
+      end
     end
 
     def set_output_stream(name, path, to_stdout, to_file)
