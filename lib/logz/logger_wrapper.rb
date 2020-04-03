@@ -13,38 +13,48 @@ module Logz
     end
 
     def color(color_name)
-      @color = color_name
+      @color = color_name.to_sym
       self
     end
 
-    # user_id: 1
-    def tagged(tags)
+    # logger.tag(user_id: 1).info("foo")
+    # logger.tag("user is nil").error("bar")
+    # logger.tag(["a", "b"]).debug("bar")
+    def tag(tags)
       if tags.is_a?(Hash)
-        @tags << tags.map { |k, v| "[#{k&.upcase}=#{v}]" }.join(" ")
+        @tags << tags.map { |k, v| "[#{k.to_s.upcase}=#{v}]" }.join(" ")
       elsif tags.is_a?(Array)
-        @tags << tags.map { |v| "[#{v&.upcase}]" }.join(" ")
+        @tags << tags.map { |v| "[#{v.to_s}]" }.join(" ")
       else
-        @tags << "[#{tags.to_s&.upcase}]"
+        @tags << "[#{tags.to_s}]"
       end
 
+      @tags.uniq!
+
       self
     end
+    alias_method :tagged, :tag
 
     def has_level?(level)
       Logz.config.levels.include?(level)
+    end
+
+    def add(severity, message = nil, progname = nil)
+      severity = Logger.const_get(severity.upcase) if severity.is_a?(Symbol)
+      logger.send(:add, severity, to_output(message), progname)
+    ensure
+      reset
     end
 
     alias_method :tag, :tagged
 
     def method_missing(m, *args, &block)
       if has_level?(m)
-        logger.send(m, to_output(args.first))
-        reset
+        add(m, *args)
       elsif logger.respond_to?(m)
         logger.send(m, *args)
       elsif Rainbow::X11ColorNames::NAMES.include?(m)
-        @color = m.to_sym
-        self
+        color(m)
       else
         super
       end
